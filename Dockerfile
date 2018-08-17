@@ -1,5 +1,5 @@
 #
-# Huginn Dockerfile
+# huginn Dockerfile
 #
 # https://github.com/
 #
@@ -9,22 +9,47 @@ FROM debian:latest
 
 MAINTAINER hihouhou < hihouhou@hihouhou.com >
 
-# Update & install packages for installing hashcat
+ENV LANG="C.UTF-8"
+ENV LC_ALL="C.UTF-8"
+ENV RAILS_ENV=production
+ENV RAILS_SERVE_STATIC_FILES=true
+
+# Install curl
 RUN apt-get update && \
-    apt-get install -y git ruby runit-systemd libssl1.0-dev
+    apt-get install -y curl gnupg2
 
-RUN gem install bundler
+# Fetch repository
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 
-RUN git clone https://github.com/huginn/huginn.git
+# Update & install packages for installing hashcat
+RUN apt-get install -y vim build-essential git zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev python-docutils pkg-config cmake nodejs graphviz ruby2.3 bundler default-libmysqlclient-dev runit
 
-COPY .env /huginn/.env
+#Create huginn user
+RUN adduser --disabled-login --gecos 'Huginn' huginn
 
-#to create a development database with some example Agents.
-RUN cd huginn && \
-    bundle install && \
-    bundle exec rake db:create && \
-    bundle exec rake db:migrate && \
-    bundle exec rake db:seed
+#Install foreman gem
+RUN gem install foreman
 
+USER huginn
+#Install and configure hashcat
+RUN cd /home/huginn && \
+    git clone https://github.com/huginn/huginn.git -b master huginn && \
+    cd huginn && \
+    mkdir -p log tmp/pids tmp/sockets && \
+    cp config/unicorn.rb.example config/unicorn.rb
 
+WORKDIR /home/huginn/huginn
+
+COPY .env /home/huginn/huginn/.env
+COPY Procfile /home/huginn/huginn/Procfile
+COPY unicorn.rb /home/huginn/huginn/config/unicorn.rb
+
+# Install gems
+RUN bundle install --path vendor/bundle --deployment --without development test
+
+#Other commands
+#RUN bundle exec rake db:seed RAILS_ENV=production SEED_USERNAME=admin SEED_PASSWORD=password
+RUN bundle exec rake assets:precompile RAILS_ENV=production
+
+#USER root
 CMD ["bundle", "exec", "foreman", "start"]
