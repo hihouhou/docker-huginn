@@ -5,7 +5,7 @@
 #
 
 # Pull base image.
-FROM debian:latest
+FROM debian:buster-backports
 
 MAINTAINER hihouhou < hihouhou@hihouhou.com >
 
@@ -22,7 +22,8 @@ RUN apt-get update && \
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 
 # Update & install packages for installing huginn
-RUN apt-get install -y vim build-essential git zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev python-docutils pkg-config cmake nodejs graphviz ruby2.3 bundler default-libmysqlclient-dev runit jq 
+RUN apt-get update && \
+    apt-get install -y vim build-essential git zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev python-docutils pkg-config cmake nodejs graphviz ruby2.5 bundler default-libmysqlclient-dev runit jq python-requests bsdmainutils
 
 #Create huginn user
 RUN adduser --disabled-login --gecos 'Huginn' huginn
