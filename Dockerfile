@@ -16,10 +16,10 @@ ENV RAILS_SERVE_STATIC_FILES=true
 
 # Install curl
 RUN apt-get update && \
-    apt-get install -y curl gnupg2
+    apt-get install -y curl gnupg2 nmap
 
 # Fetch repository
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 
 # Update & install packages for installing huginn
 RUN apt-get update && \
@@ -46,7 +46,9 @@ COPY Procfile /home/huginn/huginn/Procfile
 COPY unicorn.rb /home/huginn/huginn/config/unicorn.rb
 
 # Install gems
-RUN bundle install --path vendor/bundle --deployment --without development test
+#RUN bundle install --path vendor/bundle --deployment --without development test
+RUN bundle lock --update rails
+RUN bundle install --path vendor/bundle
 
 #Other commands
 #RUN bundle exec rake db:seed RAILS_ENV=production SEED_USERNAME=admin SEED_PASSWORD=password
