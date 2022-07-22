@@ -29,7 +29,7 @@ RUN apt-get update && \
 RUN adduser --disabled-login --gecos 'Huginn' huginn
 
 #Install foreman gem
-RUN gem install foreman bundler:2.3.5
+RUN gem install foreman bundler:2.3.18
 
 USER huginn
 #Install and configure hashcat
