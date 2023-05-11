@@ -16,23 +16,31 @@ ENV RAILS_SERVE_STATIC_FILES=true
 
 # Install curl
 RUN apt-get update && \
-    apt-get install -y curl gnupg2 nmap
+    apt-get install -y curl gnupg2
 
 # Fetch repository
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 
 # Update & install packages for installing huginn
 RUN apt-get update && \
-    apt-get install -y vim build-essential git zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev pkg-config cmake nodejs graphviz ruby2.7 bundler default-libmysqlclient-dev runit jq python3-requests python3-docutils bsdmainutils
+    apt-get install -y vim nmap git build-essential libssl-dev zlib1g-dev libyaml-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev pkg-config cmake nodejs graphviz default-libmysqlclient-dev runit jq python3-requests python3-docutils bsdmainutils
 
 #Create huginn user
 RUN adduser --disabled-login --gecos 'Huginn' huginn
 
+USER huginn
+# Install Ruby 3.2.2
+RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv && \
+    git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build && \
+    echo 'eval "$(~/.rbenv/bin/rbenv init - bash)"' >> ~/.bashrc && \
+    $HOME/.rbenv/bin/rbenv install 3.2.2 && \
+    $HOME/.rbenv/bin/rbenv global 3.2.2
+
+ENV PATH="/home/huginn/.rbenv/shims:${PATH}"
 #Install foreman gem
 RUN gem install foreman bundler:2.3.18
 
-USER huginn
-#Install and configure hashcat
+#Install and configure huginn
 RUN cd /home/huginn && \
     git clone https://github.com/huginn/huginn.git -b master huginn && \
     cd huginn && \
@@ -45,12 +53,7 @@ COPY .env /home/huginn/huginn/.env
 COPY Procfile /home/huginn/huginn/Procfile
 COPY unicorn.rb /home/huginn/huginn/config/unicorn.rb
 
-# Install gems
-#RUN bundle install --path vendor/bundle --deployment --without development test
-USER root
-RUN bundle lock --update rails
 USER huginn
-#RUN bundle install --path vendor/bundle
 RUN bundle config set --local path 'vendor/bundle' && \
     bundle install
 
