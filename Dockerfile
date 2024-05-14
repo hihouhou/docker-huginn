@@ -36,8 +36,8 @@ USER huginn
 RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv && \
     git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build && \
     echo 'eval "$(~/.rbenv/bin/rbenv init - bash)"' >> ~/.bashrc && \
-    $HOME/.rbenv/bin/rbenv install 3.2.2 && \
-    $HOME/.rbenv/bin/rbenv global 3.2.2
+    $HOME/.rbenv/bin/rbenv install 3.2.4 && \
+    $HOME/.rbenv/bin/rbenv global 3.2.4
 
 ENV PATH="/home/huginn/.rbenv/shims:${PATH}"
 #Install foreman gem
